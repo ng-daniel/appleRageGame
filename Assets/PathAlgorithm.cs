@@ -28,11 +28,11 @@ public class PathAlgorithm
 
         // Create a 2D array to store the distance of each cell
         // from the source
-        int[][] dis = new int[n][];
-        for (int i = 0; i < n; i++)
+        int[][] dis = new int[grid.Length][];
+        for (int i = 0; i < grid.Length; i++)
         {
-            dis[i] = new int[m];
-            for (int j = 0; j < m; j++)
+            dis[i] = new int[grid[i].Length];
+            for (int j = 0; j < grid[i].Length; j++)
             {
                 dis[i][j] = -1;
             }

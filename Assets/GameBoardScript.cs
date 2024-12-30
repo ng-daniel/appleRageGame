@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEditor.Experimental.GraphView;
 using UnityEditor.PackageManager;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -10,13 +11,20 @@ public class GameBoardScript : MonoBehaviour
 
     [SerializeField] int cycles;
     [SerializeField] float time;
-
+    const float appleBonus = 1;
+    const float corePenalty = -2;
+    const float hourglassBuff = 2;
 
     const int boardSize = 8;
     char[][] board = new char[boardSize][];
     [SerializeField] string map;
     [SerializeField] float numApples;
-    float numCores;
+    [SerializeField] float numCores;
+    float appleInc;
+    float coreInc;
+    float maxApples;
+    float maxCores;
+
     int[] playerPosition;
     int[] hourglassPosition;
     List<int[]> stumps = new List<int[]>();
@@ -33,27 +41,15 @@ public class GameBoardScript : MonoBehaviour
         SetDefaults();
         PrintBoard();
     }
-    public void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.A))
-        {
-            PrintBoard();
-        }
-        if (Input.GetKeyDown(KeyCode.Space))
-        {
-            RefreshBoard();
-        }
-        if (Input.GetKeyDown(KeyCode.C))
-        {
-            ClearBoard();
-            PrintBoard();
-        }
-    }
-
     public void SetDefaults()
     {
         numApples = 1;
         numCores = 1;
+        appleInc = 0.1f;
+        coreInc = 0.1f;
+        maxApples = 5;
+        maxCores = 10;
+
         playerPosition = new int[2] { 4, 2 };
         hourglassPosition = new int[2] { 4, 5 };
 
@@ -77,6 +73,115 @@ public class GameBoardScript : MonoBehaviour
         print("Cores: " + numCores);
         print("PlayerPos" + playerPosition);
         print(charKey['S'] + ": " + stringKey["stump"]);
+    }
+    public void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.P))
+        {
+            PrintBoard();
+        }
+        if (Input.GetKeyDown(KeyCode.R))
+        {
+            RefreshBoard();
+        }
+        if (Input.GetKeyDown(KeyCode.C))
+        {
+            ClearBoard();
+            PrintBoard();
+        }
+
+        char input = ProcessPlayerInput();
+        if (input != 'x')
+        {
+            PlayerMove(input);
+        }
+    }
+    public void TimerLogic()
+    {
+        time -= Time.deltaTime;
+    }
+    public char ProcessPlayerInput()
+    {
+        char direction = 'x';
+        if (Input.GetButtonDown("Horizontal"))
+        {
+            direction = Input.GetAxisRaw("Horizontal") < 0 ? 'a' : 'd';
+            print(direction);
+        }
+        else if (Input.GetButtonDown("Vertical"))
+        {
+            direction = Input.GetAxisRaw("Vertical") > 0 ? 'w' : 's';
+            print(direction);
+        }
+        return direction;
+    }
+    public void PlayerMove(char input)
+    {
+        int[] direction = new int[] { 0, 0 };
+        switch (input)
+        {
+            case 'w':
+                direction = new int[] { 1, 0 };
+                break;
+            case 's':
+                direction = new int[] { -1, 0 };
+                break;
+            case 'a':
+                direction = new int[] { 0, -1 };
+                break;
+            case 'd':
+                direction = new int[] { 0, 1 };
+                break;
+        }
+
+        int[] newPos = new int[] { playerPosition[0] + direction[0], playerPosition[1] + direction[1] };
+        print("Direction: " + direction[0] + " " + direction[1]);
+        print("New Position: " + newPos[0] + " " + newPos[1]);
+        char tile = GetPosition(newPos[0], newPos[1]);
+
+        if (tile == 'X' ||
+        tile == stringKey["stump"])
+        {
+            // DOOR STUCK
+            return;
+        }
+
+
+        if (tile == stringKey["core"])
+        {
+            EnCore(newPos);
+        }
+        else if (tile == stringKey["apple"])
+        {
+            EnApple();
+        }
+        else if (tile == stringKey["hourglass"])
+        {
+            EnHourglass();
+        }
+        Remove(playerPosition);
+        Place(newPos, "player");
+        playerPosition = newPos;
+    }
+    public void EnCore(int[] tile)
+    {
+        ShiftTime(corePenalty);
+        seeds.Add(tile);
+    }
+    public void EnApple()
+    {
+        ShiftTime(appleBonus);
+    }
+    public void EnHourglass()
+    {
+        cycles++;
+        numApples += appleInc;
+        numCores += coreInc;
+        RefreshBoard();
+    }
+    public void ShiftTime(float num)
+    {
+        time += num;
     }
 
     public char[][] GetBoard()
@@ -124,6 +229,11 @@ public class GameBoardScript : MonoBehaviour
         Remove(hourglassPosition);
         hourglassPosition = GetRandomEmptyPosition();
         Place(hourglassPosition, "hourglass");
+
+        if (!IsBoardPossible(board))
+        {
+            RefreshBoard();
+        }
     }
     public void Place(int[] pos, string key)
     {
@@ -160,14 +270,6 @@ public class GameBoardScript : MonoBehaviour
             new char[] {'E','E','E','E','E','E','E','E'},
             new char[] {'E','E','E','E','E','E','E','E'}
         };
-    }
-    public void ProcessPlayerInput()
-    {
-
-    }
-    public void BoardTick()
-    {
-
     }
     public char GetPosition(int x, int y)
     {
@@ -222,7 +324,7 @@ public class GameBoardScript : MonoBehaviour
             for (int j = 0; j < grid[i].Length; j++)
             {
                 char value = grid[i][j];
-                numgrid[i][j] = value == stringKey["stump"] ? 1 : 0;
+                numgrid[i][j] = value == stringKey["stump"] || value == stringKey["core"] ? 1 : 0;
 
                 if (value == stringKey["player"])
                 {

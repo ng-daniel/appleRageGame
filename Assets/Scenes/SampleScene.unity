@@ -1141,7 +1141,7 @@ TilemapRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: -10
+  m_SortingOrder: -9
   m_ChunkSize: {x: 32, y: 32, z: 32}
   m_ChunkCullingBounds: {x: 0, y: 0, z: 0}
   m_MaxChunkCount: 16
@@ -1544,8 +1544,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1fb81e75e2cb7a74b8fc7c0086b1746a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  cycles: 0
+  time: 0
   map: 
   numApples: 0
+  numCores: 0
+  appleInc: 0
+  coreInc: 0
 --- !u!114 &1060135551
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1571,7 +1576,32 @@ MonoBehaviour:
   - {fileID: 2932917469068319264, guid: 4d54e37b256bcda42954df76a63c0f1c, type: 3}
   - {fileID: 2932917469068319264, guid: 4d54e37b256bcda42954df76a63c0f1c, type: 3}
   - {fileID: 2932917469068319264, guid: 4d54e37b256bcda42954df76a63c0f1c, type: 3}
+  - {fileID: 2932917469068319264, guid: 4d54e37b256bcda42954df76a63c0f1c, type: 3}
+  - {fileID: 2932917469068319264, guid: 4d54e37b256bcda42954df76a63c0f1c, type: 3}
+  - {fileID: 2932917469068319264, guid: 4d54e37b256bcda42954df76a63c0f1c, type: 3}
+  - {fileID: 2932917469068319264, guid: 4d54e37b256bcda42954df76a63c0f1c, type: 3}
+  - {fileID: 2932917469068319264, guid: 4d54e37b256bcda42954df76a63c0f1c, type: 3}
+  - {fileID: 2932917469068319264, guid: 4d54e37b256bcda42954df76a63c0f1c, type: 3}
+  - {fileID: 2932917469068319264, guid: 4d54e37b256bcda42954df76a63c0f1c, type: 3}
+  - {fileID: 2932917469068319264, guid: 4d54e37b256bcda42954df76a63c0f1c, type: 3}
+  - {fileID: 2932917469068319264, guid: 4d54e37b256bcda42954df76a63c0f1c, type: 3}
+  - {fileID: 2932917469068319264, guid: 4d54e37b256bcda42954df76a63c0f1c, type: 3}
+  - {fileID: 2932917469068319264, guid: 4d54e37b256bcda42954df76a63c0f1c, type: 3}
+  - {fileID: 2932917469068319264, guid: 4d54e37b256bcda42954df76a63c0f1c, type: 3}
+  - {fileID: 2932917469068319264, guid: 4d54e37b256bcda42954df76a63c0f1c, type: 3}
+  - {fileID: 2932917469068319264, guid: 4d54e37b256bcda42954df76a63c0f1c, type: 3}
+  - {fileID: 2932917469068319264, guid: 4d54e37b256bcda42954df76a63c0f1c, type: 3}
+  - {fileID: 2932917469068319264, guid: 4d54e37b256bcda42954df76a63c0f1c, type: 3}
+  - {fileID: 2932917469068319264, guid: 4d54e37b256bcda42954df76a63c0f1c, type: 3}
+  - {fileID: 2932917469068319264, guid: 4d54e37b256bcda42954df76a63c0f1c, type: 3}
+  - {fileID: 2932917469068319264, guid: 4d54e37b256bcda42954df76a63c0f1c, type: 3}
+  - {fileID: 2932917469068319264, guid: 4d54e37b256bcda42954df76a63c0f1c, type: 3}
   seeds:
+  - {fileID: 2932917469068319264, guid: 133ef17b46abcce44b92a1d8b364968e, type: 3}
+  - {fileID: 2932917469068319264, guid: 133ef17b46abcce44b92a1d8b364968e, type: 3}
+  - {fileID: 2932917469068319264, guid: 133ef17b46abcce44b92a1d8b364968e, type: 3}
+  - {fileID: 2932917469068319264, guid: 133ef17b46abcce44b92a1d8b364968e, type: 3}
+  - {fileID: 2932917469068319264, guid: 133ef17b46abcce44b92a1d8b364968e, type: 3}
   - {fileID: 2932917469068319264, guid: 133ef17b46abcce44b92a1d8b364968e, type: 3}
   - {fileID: 2932917469068319264, guid: 133ef17b46abcce44b92a1d8b364968e, type: 3}
   - {fileID: 2932917469068319264, guid: 133ef17b46abcce44b92a1d8b364968e, type: 3}
@@ -1589,6 +1619,11 @@ MonoBehaviour:
   - {fileID: 2932917469068319264, guid: 1d8428aa994de454bb794e2caa02a32d, type: 3}
   - {fileID: 2932917469068319264, guid: 1d8428aa994de454bb794e2caa02a32d, type: 3}
   cores:
+  - {fileID: 8806632031528180752, guid: eb415c2a4765ba848b683b7f2e37d0a8, type: 3}
+  - {fileID: 8806632031528180752, guid: eb415c2a4765ba848b683b7f2e37d0a8, type: 3}
+  - {fileID: 8806632031528180752, guid: eb415c2a4765ba848b683b7f2e37d0a8, type: 3}
+  - {fileID: 8806632031528180752, guid: eb415c2a4765ba848b683b7f2e37d0a8, type: 3}
+  - {fileID: 8806632031528180752, guid: eb415c2a4765ba848b683b7f2e37d0a8, type: 3}
   - {fileID: 8806632031528180752, guid: eb415c2a4765ba848b683b7f2e37d0a8, type: 3}
   - {fileID: 8806632031528180752, guid: eb415c2a4765ba848b683b7f2e37d0a8, type: 3}
   - {fileID: 8806632031528180752, guid: eb415c2a4765ba848b683b7f2e37d0a8, type: 3}
