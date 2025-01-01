@@ -182,6 +182,9 @@ public class GameBoardScript : MonoBehaviour
             // DOOR STUCK
             return;
         }
+        Remove(playerPosition);
+        Place(newPos, "player");
+        playerPosition = newPos;
 
         if (tile == stringKey["core"])
         {
@@ -195,9 +198,6 @@ public class GameBoardScript : MonoBehaviour
         {
             EnHourglass();
         }
-        Remove(playerPosition);
-        Place(newPos, "player");
-        playerPosition = newPos;
 
         RememberSeeds();
         PrintBoard();
@@ -277,10 +277,11 @@ public class GameBoardScript : MonoBehaviour
 
             // check for seeds
             // replace seeds with stumps
-            for (int i = 0; i < seeds.Count; i++)
+            while (seeds.Count > 0)
             {
-                int[] pos = seeds[i];
+                int[] pos = seeds[0];
                 stumps.Add(pos);
+                seeds.RemoveAt(0);
             }
 
             // place stumps
@@ -294,6 +295,7 @@ public class GameBoardScript : MonoBehaviour
             cores = new List<int[]>();
 
             // put player back
+            print("Player Position: " + playerPosition[0] + " " + playerPosition[1]);
             Place(playerPosition, "player");
 
             // make new cores based on numcores
@@ -314,10 +316,9 @@ public class GameBoardScript : MonoBehaviour
             // clear and put hourglass somewhere
             Remove(hourglassPosition);
             hourglassPosition = GetRandomEmptyPosition();
-            int[] previous = new int[] { hourglassPosition[0], hourglassPosition[1] };
-            int[] p = new int[] { playerPosition[0], playerPosition[1] };
-            while (hourglassPosition[0] == p[0] && hourglassPosition[1] == p[1] &&
-                    hourglassPosition[0] == previous[0] && hourglassPosition[1] == previous[1])
+            int[] p = new int[] { hourglassPosition[0], hourglassPosition[1] };
+            int[] ppos = new int[] { playerPosition[0], playerPosition[1] };
+            while (hourglassPosition[0] == p[0] && hourglassPosition[1] == p[1])
             {
                 hourglassPosition = GetRandomEmptyPosition();
             }
