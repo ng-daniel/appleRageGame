@@ -35,7 +35,7 @@ public class BoardRenderScript : MonoBehaviour
         HideAll(apples);
         HideAll(cores);
 
-        HideObject(player);
+        //HideObject(player);
         HideObject(hourglass);
 
         char[][] board = game.GetBoard();
@@ -66,7 +66,8 @@ public class BoardRenderScript : MonoBehaviour
                 }
                 if (tile == stringKey["player"])
                 {
-                    RenderObject(player, i, j);
+                    SmoothMoveObject(player, i, j, 0.005f);
+                    //RenderObject(player, i, j);
                 }
                 if (tile == stringKey["hourglass"])
                 {
@@ -102,6 +103,12 @@ public class BoardRenderScript : MonoBehaviour
             HideObject(list[i]);
         }
     }
+    void SmoothMoveObject(GameObject obj, int x, int y, float time)
+    {
+        Vector2 start = new Vector2(obj.transform.position.x, obj.transform.position.y);
+        Vector2 end = new Vector2(y, x);
+        StartCoroutine(SmoothMoveCoroutine(obj, start, end, time, Vector2.zero));
+    }
     void RenderObject(GameObject obj, int x, int y)
     {
         obj.transform.position = new Vector2(y, x);
@@ -125,5 +132,15 @@ public class BoardRenderScript : MonoBehaviour
             }
         }
         return null;
+    }
+    IEnumerator SmoothMoveCoroutine(GameObject obj, Vector2 start, Vector2 end, float time, Vector2 velocity)
+    {
+        obj.transform.position = Vector2.SmoothDamp(obj.transform.position, end, ref velocity, time);
+        time -= Time.deltaTime;
+        if (time > 0)
+        {
+            yield return null;
+        }
+        //obj.transform.position = end;
     }
 }

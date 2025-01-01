@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 13312, guid: 0000000000000000e000000000000000, type: 0}
   m_Name: neuro_sheet_18
   m_EditorClassIdentifier: 
-  m_Sprite: {fileID: 1791724325, guid: 4c4225c529b6ae74b8d70f8a6386c53d, type: 3}
+  m_Sprite: {fileID: 497038641, guid: 4c4225c529b6ae74b8d70f8a6386c53d, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_Transform:
     e00: 1

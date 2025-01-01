@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.VisualScripting;
 using UnityEditor.Experimental.GraphView;
 using UnityEditor.PackageManager;
 using UnityEngine;
@@ -10,10 +11,11 @@ public class GameBoardScript : MonoBehaviour
 {
 
     [SerializeField] int cycles;
+    [SerializeField] int bonus;
     [SerializeField] float time;
-    const float appleBonus = 1;
-    const float corePenalty = -2;
-    const float hourglassBuff = 2;
+    float appleBonus;
+    const float corePenalty = -3;
+    const float hourglassBonus = 2;
 
     const int boardSize = 8;
     char[][] board = new char[boardSize][];
@@ -25,6 +27,9 @@ public class GameBoardScript : MonoBehaviour
     float maxApples;
     float maxCores;
 
+    [SerializeField] float moveCd;
+    float maxMoveCd;
+
     int[] playerPosition;
     int[] hourglassPosition;
     List<int[]> stumps = new List<int[]>();
@@ -33,25 +38,52 @@ public class GameBoardScript : MonoBehaviour
     List<int[]> cores = new List<int[]>();
 
     public static Dictionary<string, char> stringKey = new Dictionary<string, char>();
-    public static Dictionary<char, string> charKey = new Dictionary<char, string>();
-
+    public bool gamestart;
+    public bool gameover;
 
     public void Start()
     {
         SetDefaults();
-        PrintBoard();
+        print(TestBoardPossible());
+    }
+    public void StartGame()
+    {
+        RefreshBoard();
+        ResetGame();
+        StartBoard();
+        gamestart = true;
+    }
+    public void GameOver(string message)
+    {
+        gameover = true;
+    }
+    public void ResetGame()
+    {
+        gamestart = false;
+        gameover = false;
+
+        stumps = new List<int[]>();
+
+        time = 100f;
+
+        numApples = 1;
+        numCores = 1;
+
+        playerPosition = new int[2] { 3, 2 };
+        hourglassPosition = new int[2] { 3, 5 };
+
+        ClearBoard();
     }
     public void SetDefaults()
     {
-        numApples = 1;
-        numCores = 1;
+        ResetGame();
+
         appleInc = 0.1f;
         coreInc = 0.1f;
-        maxApples = 5;
-        maxCores = 10;
 
-        playerPosition = new int[2] { 4, 2 };
-        hourglassPosition = new int[2] { 4, 5 };
+        maxApples = 4;
+        maxCores = 5;
+        maxMoveCd = 0.15f;
 
         stringKey.Add("empty", 'E');
         stringKey.Add("apple", 'A');
@@ -60,19 +92,6 @@ public class GameBoardScript : MonoBehaviour
         stringKey.Add("player", 'P');
         stringKey.Add("seed", 'D');
         stringKey.Add("stump", 'S');
-
-        charKey = stringKey.ToDictionary(x => x.Value, x => x.Key);
-
-        char e = stringKey["empty"];
-
-        ClearBoard();
-
-        print("Defaults Set");
-        print(board.Length + "x" + board[3].Length);
-        print("Apples: " + numApples);
-        print("Cores: " + numCores);
-        print("PlayerPos" + playerPosition);
-        print(charKey['S'] + ": " + stringKey["stump"]);
     }
     public void Update()
     {
@@ -80,38 +99,58 @@ public class GameBoardScript : MonoBehaviour
         {
             PrintBoard();
         }
-        if (Input.GetKeyDown(KeyCode.R))
+
+        if (!gamestart)
         {
-            RefreshBoard();
-        }
-        if (Input.GetKeyDown(KeyCode.C))
-        {
-            ClearBoard();
-            PrintBoard();
+            return;
         }
 
-        char input = ProcessPlayerInput();
+        char input = !gameover ? ProcessPlayerInput() : 'x';
         if (input != 'x')
         {
             PlayerMove(input);
         }
+        TimerLogic();
     }
     public void TimerLogic()
     {
-        time -= Time.deltaTime;
+        time -= !gameover ? Time.deltaTime : 0;
+        if (time <= -0.5)
+        {
+            GameOver("You ran out of time.");
+        }
     }
     public char ProcessPlayerInput()
     {
         char direction = 'x';
+
         if (Input.GetButtonDown("Horizontal"))
         {
             direction = Input.GetAxisRaw("Horizontal") < 0 ? 'a' : 'd';
-            print(direction);
+            moveCd = maxMoveCd;
+        }
+        else if (Input.GetButton("Horizontal"))
+        {
+            moveCd -= moveCd > -1f ? Time.deltaTime : 0;
+            if (moveCd <= 0)
+            {
+                direction = Input.GetAxisRaw("Horizontal") < 0 ? 'a' : 'd';
+                moveCd = maxMoveCd;
+            }
         }
         else if (Input.GetButtonDown("Vertical"))
         {
             direction = Input.GetAxisRaw("Vertical") > 0 ? 'w' : 's';
-            print(direction);
+            moveCd = maxMoveCd;
+        }
+        else if (Input.GetButton("Vertical"))
+        {
+            moveCd -= moveCd > -1f ? Time.deltaTime : 0;
+            if (moveCd <= 0)
+            {
+                direction = Input.GetAxisRaw("Vertical") > 0 ? 'w' : 's';
+                moveCd = maxMoveCd;
+            }
         }
         return direction;
     }
@@ -135,8 +174,6 @@ public class GameBoardScript : MonoBehaviour
         }
 
         int[] newPos = new int[] { playerPosition[0] + direction[0], playerPosition[1] + direction[1] };
-        print("Direction: " + direction[0] + " " + direction[1]);
-        print("New Position: " + newPos[0] + " " + newPos[1]);
         char tile = GetPosition(newPos[0], newPos[1]);
 
         if (tile == 'X' ||
@@ -146,14 +183,13 @@ public class GameBoardScript : MonoBehaviour
             return;
         }
 
-
         if (tile == stringKey["core"])
         {
             EnCore(newPos);
         }
         else if (tile == stringKey["apple"])
         {
-            EnApple();
+            EnApple(newPos);
         }
         else if (tile == stringKey["hourglass"])
         {
@@ -162,22 +198,64 @@ public class GameBoardScript : MonoBehaviour
         Remove(playerPosition);
         Place(newPos, "player");
         playerPosition = newPos;
+
+        RememberSeeds();
+        PrintBoard();
     }
     public void EnCore(int[] tile)
     {
         ShiftTime(corePenalty);
         seeds.Add(tile);
     }
-    public void EnApple()
+    public void EnApple(int[] tile)
     {
-        ShiftTime(appleBonus);
+        appleBonus = numApples / 2f;
+
+        apples.RemoveAt(0);
     }
     public void EnHourglass()
     {
+        ShiftTime(hourglassBonus);
+
         cycles++;
+        int a = (int)appleBonus >= 1 ? (int)appleBonus : 1;
+        bonus += apples.Count == 0 ? a : 0;
         numApples += appleInc;
         numCores += coreInc;
+
+        if (numApples > maxApples)
+        {
+            numApples = maxApples;
+        }
+        if (numCores > maxCores)
+        {
+            numCores = maxCores;
+        }
+
         RefreshBoard();
+    }
+    public void RemoveFrom(List<int[]> list, int[] item)
+    {
+        for (int i = 0; i < list.Count; i++)
+        {
+            if (list[i].Equals(item))
+            {
+                list.Remove(item);
+                return;
+            }
+        }
+    }
+    public int GetCycles()
+    {
+        return cycles;
+    }
+    public int GetBonus()
+    {
+        return bonus;
+    }
+    public float GetTime()
+    {
+        return time;
     }
     public void ShiftTime(float num)
     {
@@ -190,49 +268,81 @@ public class GameBoardScript : MonoBehaviour
     }
     public void RefreshBoard()
     {
-        // clear board
-        ClearBoard();
-        PrintBoard();
+        int count = 0;
+        while (count < 100)
+        {
+            // clear board
+            ClearBoard();
+            PrintBoard();
 
-        // check for seeds
-        // replace seeds with stumps
+            // check for seeds
+            // replace seeds with stumps
+            for (int i = 0; i < seeds.Count; i++)
+            {
+                int[] pos = seeds[i];
+                stumps.Add(pos);
+            }
+
+            // place stumps
+            for (int i = 0; i < stumps.Count; i++)
+            {
+                Place(stumps[i], "stump");
+            }
+
+            // clear apples and cores
+            apples = new List<int[]>();
+            cores = new List<int[]>();
+
+            // put player back
+            Place(playerPosition, "player");
+
+            // make new cores based on numcores
+            for (int i = 0; i < (int)numCores; i++)
+            {
+                int[] pos = GetRandomEmptyPosition();
+                Place(pos, "core");
+                cores.Add(pos);
+            }
+            // make new apples based on numapples
+            for (int i = 0; i < (int)numApples; i++)
+            {
+                int[] pos = GetRandomEmptyPosition();
+                Place(pos, "apple");
+                apples.Add(pos);
+            }
+
+            // clear and put hourglass somewhere
+            Remove(hourglassPosition);
+            hourglassPosition = GetRandomEmptyPosition();
+            int[] previous = new int[] { hourglassPosition[0], hourglassPosition[1] };
+            int[] p = new int[] { playerPosition[0], playerPosition[1] };
+            while (hourglassPosition[0] == p[0] && hourglassPosition[1] == p[1] &&
+                    hourglassPosition[0] == previous[0] && hourglassPosition[1] == previous[1])
+            {
+                hourglassPosition = GetRandomEmptyPosition();
+            }
+            Place(hourglassPosition, "hourglass");
+            print("Hourglass Position: " + hourglassPosition[0] + " " + hourglassPosition[1]);
+
+            if (IsBoardPossible(board))
+            {
+                PrintBoard();
+                return;
+            }
+            print(count + ": A board was found to be impossible.");
+            PrintBoard();
+            count++;
+        }
+    }
+    public void RememberSeeds()
+    {
         for (int i = 0; i < seeds.Count; i++)
         {
             int[] pos = seeds[i];
-            board[pos[0]][pos[1]] = stringKey["stump"];
-            stumps.Add(pos);
-        }
-
-        // clear apples and cores
-        apples = new List<int[]>();
-        cores = new List<int[]>();
-
-        // put player back
-        Place(playerPosition, "player");
-
-        // make new cores based on numcores
-        for (int i = 0; i < (int)numCores; i++)
-        {
-            int[] pos = GetRandomEmptyPosition();
-            Place(pos, "core");
-            cores.Add(pos);
-        }
-        // make new apples based on numapples
-        for (int i = 0; i < (int)numCores; i++)
-        {
-            int[] pos = GetRandomEmptyPosition();
-            Place(pos, "apple");
-            apples.Add(pos);
-        }
-
-        // clear and put hourglass somewhere
-        Remove(hourglassPosition);
-        hourglassPosition = GetRandomEmptyPosition();
-        Place(hourglassPosition, "hourglass");
-
-        if (!IsBoardPossible(board))
-        {
-            RefreshBoard();
+            if (GetPosition(pos[0], pos[1]) != stringKey["player"])
+            {
+                Place(pos, "seed");
+            }
         }
     }
     public void Place(int[] pos, string key)
@@ -265,6 +375,20 @@ public class GameBoardScript : MonoBehaviour
             new char[] {'E','E','E','E','E','E','E','E'},
             new char[] {'E','E','E','E','E','E','E','E'},
             new char[] {'E','E','E','E','E','E','E','E'},
+            new char[] {'E','E','E','E','E','E','E','E'},
+            new char[] {'E','E','E','E','E','E','E','E'},
+            new char[] {'E','E','E','E','E','E','E','E'},
+            new char[] {'E','E','E','E','E','E','E','E'}
+        };
+    }
+    public void StartBoard()
+    {
+        board = new char[8][]
+        {
+            new char[] {'E','E','E','E','E','E','E','E'},
+            new char[] {'E','E','E','E','E','E','E','E'},
+            new char[] {'E','E','E','E','E','E','E','E'},
+            new char[] {'E','E','P','E','E','H','E','E'},
             new char[] {'E','E','E','E','E','E','E','E'},
             new char[] {'E','E','E','E','E','E','E','E'},
             new char[] {'E','E','E','E','E','E','E','E'},
@@ -343,6 +467,34 @@ public class GameBoardScript : MonoBehaviour
 
         return p != null &&
             h != null &&
-            PathAlgorithm.PossiblePath(h[0] + 1, h[1] + 1, numgrid, p) != 1;
+            PathAlgorithm.IsBoardPossible(numgrid, p, h);
+    }
+    public bool TestBoardPossible()
+    {
+        char[][] newboard = new char[8][]
+        {
+            new char[] {'E','E','E','E','E','E','E','E'},
+            new char[] {'E','E','E','E','E','E','E','E'},
+            new char[] {'E','E','E','E','E','E','E','E'},
+            new char[] {'E','E','P','E','E','E','E','E'},
+            new char[] {'E','E','E','C','E','C','E','E'},
+            new char[] {'E','E','E','E','C','E','E','E'},
+            new char[] {'E','H','E','E','E','E','E','E'},
+            new char[] {'E','E','E','E','E','E','E','E'}
+        };
+        return IsBoardPossible(newboard);
+    }
+    void printNumMap(int[][] numMap)
+    {
+        map = "";
+        for (int i = numMap.Length - 1; i >= 0; i--)
+        {
+            for (int j = 0; j < numMap[i].Length; j++)
+            {
+                map += numMap[i][j] + " ";
+            }
+            map += "\n";
+        }
+
     }
 }
