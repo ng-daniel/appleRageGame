@@ -78,7 +78,7 @@ public class BoardRenderScript : MonoBehaviour
     }
     void InitializeRender()
     {
-        player = Instantiate(player);
+        player = Instantiate(player, new Vector2(3, 1), transform.rotation);
         player.transform.parent = transform;
         hourglass = Instantiate(hourglass);
         hourglass.transform.parent = transform;

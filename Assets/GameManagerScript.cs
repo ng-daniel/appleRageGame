@@ -8,15 +8,22 @@ public class GameManagerScript : MonoBehaviour
     bool gameStart;
     bool gameEnd;
     UIManager ui;
+    DifficultyScript difficulty;
     float score;
+
+    float startTime;
+
+    JukeboxScript jukebox;
 
     // Start is called before the first frame update
     void Start()
     {
         game = FindObjectOfType<GameBoardScript>();
         ui = FindObjectOfType<UIManager>();
+        jukebox = FindObjectOfType<JukeboxScript>();
+        difficulty = FindObjectOfType<DifficultyScript>();
 
-        ui.StartUI();
+        Reset();
     }
 
     // Update is called once per frame
@@ -55,9 +62,23 @@ public class GameManagerScript : MonoBehaviour
     }
     void StartGame()
     {
+        switch (difficulty.GetDifficulty())
+        {
+            case 0:
+                startTime = 120f;
+                break;
+            case 1:
+                startTime = 30f;
+                break;
+            case 2:
+                startTime = 1f;
+                break;
+        }
+
         gameStart = true;
-        game.StartGame();
+        game.StartGame(startTime);
         ui.GameUI();
+        jukebox.PlayGameSong();
     }
     void EndGame()
     {
@@ -70,5 +91,7 @@ public class GameManagerScript : MonoBehaviour
         gameEnd = false;
         game.ResetGame();
         ui.StartUI();
+        jukebox.PlayMenuSong();
     }
+
 }

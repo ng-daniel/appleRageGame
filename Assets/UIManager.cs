@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
@@ -11,6 +12,9 @@ public class UIManager : MonoBehaviour
     [SerializeField] TMP_Text time;
     [SerializeField] TMP_Text score_game;
     [SerializeField] TMP_Text score_end;
+
+    const string red = "<color=#8E0033>";
+    const string white = "<color=#FFFFFF>";
 
 
     public void StartUI()
@@ -39,7 +43,8 @@ public class UIManager : MonoBehaviour
     }
     public void UpdateTime(float t)
     {
-        time.text = formatTime(t);
+        String timeStr = formatTime(t);
+        time.text = t <= 5f ? red + timeStr : timeStr;
     }
     static string formatTime(float time)
     {

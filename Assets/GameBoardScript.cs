@@ -15,7 +15,7 @@ public class GameBoardScript : MonoBehaviour
     [SerializeField] float time;
     float appleBonus;
     const float corePenalty = -3;
-    const float hourglassBonus = 2;
+    const float hourglassBonus = 1f;
 
     const int boardSize = 8;
     char[][] board = new char[boardSize][];
@@ -46,11 +46,12 @@ public class GameBoardScript : MonoBehaviour
         SetDefaults();
         print(TestBoardPossible());
     }
-    public void StartGame()
+    public void StartGame(float time)
     {
         RefreshBoard();
         ResetGame();
         StartBoard();
+        this.time = time;
         gamestart = true;
     }
     public void GameOver(string message)
@@ -64,7 +65,9 @@ public class GameBoardScript : MonoBehaviour
 
         stumps = new List<int[]>();
 
-        time = 100f;
+        time = 1f;
+        cycles = 0;
+        bonus = 0;
 
         numApples = 1;
         numCores = 1;
@@ -73,6 +76,7 @@ public class GameBoardScript : MonoBehaviour
         hourglassPosition = new int[2] { 3, 5 };
 
         ClearBoard();
+        StartBoard();
     }
     public void SetDefaults()
     {
