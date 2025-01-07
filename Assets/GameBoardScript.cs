@@ -1,11 +1,5 @@
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using Unity.VisualScripting;
-using UnityEditor.Experimental.GraphView;
-using UnityEditor.PackageManager;
 using UnityEngine;
-using UnityEngine.UIElements;
 
 public class GameBoardScript : MonoBehaviour
 {
@@ -14,7 +8,7 @@ public class GameBoardScript : MonoBehaviour
     [SerializeField] int bonus;
     [SerializeField] float time;
     float appleBonus;
-    const float corePenalty = -3;
+    const float corePenalty = -2;
     const float hourglassBonus = 1f;
 
     const int boardSize = 8;

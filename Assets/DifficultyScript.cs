@@ -15,12 +15,15 @@ public class DifficultyScript : MonoBehaviour
     [SerializeField] TMP_Text end_display;
     [SerializeField] List<string> levels; //assign in inspector
 
+    AudioPlayerScript audioplayer;
+
     const string red = "<color=#8E0033>";
     const string white = "<color=#FFFFFF>";
 
     void Start()
     {
         game = FindFirstObjectByType<GameManagerScript>();
+        audioplayer = GetComponentInChildren<AudioPlayerScript>();
         DisplayDifficulty();
     }
 
@@ -58,14 +61,24 @@ public class DifficultyScript : MonoBehaviour
     }
     public void MoveDifficulty(int num)
     {
+        if (num == 0)
+        {
+            return;
+        }
+
         difficulty += num;
         if (difficulty < 0)
         {
             difficulty = 0;
         }
-        if (difficulty > maxDifficulty)
+        else if (difficulty > maxDifficulty)
         {
             difficulty = maxDifficulty;
+        }
+        else
+        {
+            audioplayer.src.pitch = 0.75f + 0.15f * difficulty;
+            audioplayer.PlayClip(0);
         }
     }
     public string DisplayDifficulty()

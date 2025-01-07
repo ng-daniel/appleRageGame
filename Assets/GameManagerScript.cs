@@ -16,6 +16,7 @@ public class GameManagerScript : MonoBehaviour
     float startTime;
 
     JukeboxScript jukebox;
+    AudioPlayerScript audioplayer;
 
     // Start is called before the first frame update
     void Start()
@@ -24,6 +25,7 @@ public class GameManagerScript : MonoBehaviour
         ui = FindObjectOfType<UIManager>();
         jukebox = FindObjectOfType<JukeboxScript>();
         difficulty = FindObjectOfType<DifficultyScript>();
+        audioplayer = GetComponentInChildren<AudioPlayerScript>();
 
         Reset();
     }
@@ -35,6 +37,7 @@ public class GameManagerScript : MonoBehaviour
         {
             if (Input.GetKeyDown(KeyCode.Space))
             {
+                audioplayer.PlayClip(0);
                 if (!helpActive)
                 {
                     ui.HelpUI();
@@ -45,6 +48,12 @@ public class GameManagerScript : MonoBehaviour
                     StartGame();
                     helpActive = false;
                 }
+            }
+            if (!helpActive && Input.GetKeyDown(KeyCode.Escape))
+            {
+                audioplayer.PlayClip(0);
+                print("quitting!");
+                Application.Quit();
             }
         }
 
@@ -67,6 +76,7 @@ public class GameManagerScript : MonoBehaviour
         {
             if (Input.GetKeyDown(KeyCode.Space))
             {
+                audioplayer.PlayClip(0);
                 Reset();
             }
         }

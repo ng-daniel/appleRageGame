@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class AudioPlayerScript : MonoBehaviour
 {
-    [SerializeField] AudioSource src;
+    [SerializeField] public AudioSource src;
     [SerializeField] List<AudioClip> clips;
 
     public void PlayClip(int num)
