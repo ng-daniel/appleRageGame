@@ -41,8 +41,12 @@ public class GameBoardScript : MonoBehaviour
     public bool gamestart;
     public bool gameover;
 
+    AudioPlayerScript playerSrc;
+
     public void Start()
     {
+        playerSrc = GameObject.FindGameObjectWithTag("PlayerSFX").GetComponent<AudioPlayerScript>();
+
         SetDefaults();
         print(TestBoardPossible());
     }
@@ -189,18 +193,29 @@ public class GameBoardScript : MonoBehaviour
         Remove(playerPosition);
         Place(newPos, "player");
         playerPosition = newPos;
+        if (direction[0] != 0)
+        {
+            playerSrc.PlayClip(0);
+        }
+        else
+        {
+            playerSrc.PlayClip(1);
+        }
 
         if (tile == stringKey["core"])
         {
             EnCore(newPos);
+            playerSrc.PlayClip(6, 1);
         }
         else if (tile == stringKey["apple"])
         {
             EnApple(newPos);
+            playerSrc.PlayClip(5, 1);
         }
         else if (tile == stringKey["hourglass"])
         {
             EnHourglass();
+            playerSrc.PlayClip(4, 1);
         }
 
         RememberSeeds();
@@ -213,8 +228,7 @@ public class GameBoardScript : MonoBehaviour
     }
     public void EnApple(int[] tile)
     {
-        appleBonus = numApples / 2f;
-
+        appleBonus = numApples * 2;
         apples.RemoveAt(0);
     }
     public void EnHourglass()

@@ -1,11 +1,13 @@
 using System.Collections;
 using System.Collections.Generic;
+using UnityEditor;
 using UnityEngine;
 
 public class GameManagerScript : MonoBehaviour
 {
     GameBoardScript game;
-    bool gameStart;
+    public bool helpActive { get; private set; }
+    public bool gameStart { get; private set; }
     bool gameEnd;
     UIManager ui;
     DifficultyScript difficulty;
@@ -33,7 +35,16 @@ public class GameManagerScript : MonoBehaviour
         {
             if (Input.GetKeyDown(KeyCode.Space))
             {
-                StartGame();
+                if (!helpActive)
+                {
+                    ui.HelpUI();
+                    helpActive = true;
+                }
+                else
+                {
+                    StartGame();
+                    helpActive = false;
+                }
             }
         }
 
@@ -68,10 +79,10 @@ public class GameManagerScript : MonoBehaviour
                 startTime = 120f;
                 break;
             case 1:
-                startTime = 30f;
+                startTime = 45f;
                 break;
             case 2:
-                startTime = 1f;
+                startTime = 5f;
                 break;
         }
 

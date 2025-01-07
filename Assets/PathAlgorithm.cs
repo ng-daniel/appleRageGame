@@ -7,7 +7,6 @@ public class PathAlgorithm
         Queue<int[]> queue = new Queue<int[]>();
         List<int[]> visited = new List<int[]>();
         queue.Enqueue(start);
-        int count = 0;
         while (queue.Count > 0)
         {
             //Console.WriteLine("Iteration #" + count);
