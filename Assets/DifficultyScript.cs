@@ -8,10 +8,11 @@ public class DifficultyScript : MonoBehaviour
 {
 
     GameManagerScript game;
-    int difficulty = 0;
+    int difficulty = 1;
     int maxDifficulty = 2;
     [SerializeField] TMP_Text display; //assign in inspector
     [SerializeField] TMP_Text game_display;
+    [SerializeField] TMP_Text end_display;
     [SerializeField] List<string> levels; //assign in inspector
 
     const string red = "<color=#8E0033>";
@@ -35,7 +36,13 @@ public class DifficultyScript : MonoBehaviour
         if (!game_display.text.Equals(GetDifficultyText()))
         {
             game_display.text = GetDifficultyText();
+
         }
+        if (!end_display.text.Equals(GetDifficultyTextRaw()))
+        {
+            end_display.text = GetDifficultyTextRaw();
+        }
+
     }
     public int GetDifficulty()
     {
@@ -44,6 +51,10 @@ public class DifficultyScript : MonoBehaviour
     public string GetDifficultyText()
     {
         return difficulty == 2 ? red + levels[difficulty] : levels[difficulty];
+    }
+    public string GetDifficultyTextRaw()
+    {
+        return levels[difficulty];
     }
     public void MoveDifficulty(int num)
     {

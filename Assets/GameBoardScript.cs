@@ -313,7 +313,6 @@ public class GameBoardScript : MonoBehaviour
             cores = new List<int[]>();
 
             // put player back
-            print("Player Position: " + playerPosition[0] + " " + playerPosition[1]);
             Place(playerPosition, "player");
 
             // make new cores based on numcores
@@ -341,7 +340,6 @@ public class GameBoardScript : MonoBehaviour
                 hourglassPosition = GetRandomEmptyPosition();
             }
             Place(hourglassPosition, "hourglass");
-            print("Hourglass Position: " + hourglassPosition[0] + " " + hourglassPosition[1]);
 
             if (IsBoardPossible(board))
             {
