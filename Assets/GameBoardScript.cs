@@ -36,10 +36,12 @@ public class GameBoardScript : MonoBehaviour
     public bool gameover;
 
     AudioPlayerScript playerSrc;
+    AudioPlayerScript stumpSrc;
 
     public void Start()
     {
         playerSrc = GameObject.FindGameObjectWithTag("PlayerSFX").GetComponent<AudioPlayerScript>();
+        stumpSrc = GameObject.FindGameObjectWithTag("StumpSFX").GetComponent<AudioPlayerScript>();
 
         SetDefaults();
         print(TestBoardPossible());
@@ -230,8 +232,9 @@ public class GameBoardScript : MonoBehaviour
         ShiftTime(hourglassBonus);
 
         cycles++;
-        int a = (int)appleBonus >= 1 ? (int)appleBonus : 1;
-        bonus += apples.Count == 0 ? a : 0;
+        int applesCollected = (int)numApples - apples.Count;
+        int a = applesCollected == (int)numApples ? applesCollected * 2 : applesCollected;
+        bonus += a;
         numApples += appleInc;
         numCores += coreInc;
 
@@ -289,6 +292,10 @@ public class GameBoardScript : MonoBehaviour
 
             // check for seeds
             // replace seeds with stumps
+            if (seeds.Count > 0)
+            {
+                stumpSrc.PlayClip(0);
+            }
             while (seeds.Count > 0)
             {
                 int[] pos = seeds[0];
@@ -408,14 +415,11 @@ public class GameBoardScript : MonoBehaviour
     }
     public char GetPosition(int x, int y)
     {
-        try
+        if (x >= 0 && y >= 0 && x < board.Length && y < board[0].Length)
         {
             return board[x][y];
         }
-        catch
-        {
-            return 'X';
-        }
+        return 'X';
 
     }
     public bool IsEmptyPosition(int x, int y)
